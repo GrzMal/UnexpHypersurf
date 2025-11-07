@@ -1,6 +1,6 @@
 # SyzMapPn – Singular script for constructing unexpected hypersurfaces
 
-This repository provides a **Singular** program implementing the syzygy-based construction of *unexpected hypersurfaces* in projective spaces $\mathbb{P}^n$, as described in article: Janasz–Malara–Tutaj-Gasińska, *Unexpected hypersurfaces of type $(d+k,d)$, 2025.
+This repository provides a **Singular** program implementing the syzygy-based construction of *unexpected hypersurfaces* in projective spaces $\mathbb{P}^n$, as described in article: [Janasz–Malara–Tutaj-Gasińska, *Unexpected hypersurfaces of type $(d+k,d)$*, 2025].
 
 The main procedure,  
 ```unexpectedHypGen(Pts, k, n)```,  
