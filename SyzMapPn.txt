@@ -1,0 +1,289 @@
+LIB "primdec.lib";
+option(redSB);
+proc pideal(list #) {
+	matrix m[2][size(#)]=#[1..size(#)],variables(maxideal(1));
+	ideal I=minor(m,2);
+	return(std(I));
+}
+proc ptToPlane(list @P){
+	poly @f;
+	for(int i=1;i<=nvars(basering);i++){
+		@f=@f+@P[i]*var(i);
+	}
+	return(@f);
+}
+proc scalarProd(list L1, ideal L2){
+	poly res;
+	for(int i=1;i<=size(L1);i++){
+		res=res+L1[i]*L2[i];
+	}
+return(res);
+}
+proc dualL(list L1, list L2){
+	def @r=basering; 
+	string @minP="minpoly="+string(minpoly);
+	string ringDesc="ring RT=("+string(char(@r))+",e),("+varstr(@r)+",t1,t2),dp;";
+	execute(ringDesc); 
+	execute(@minP); 
+	ideal I;
+	for(int i=1;i<=nvars(basering)-2;i++){
+		I[i]=var(i)-t1*L1[i]-t2*L2[i];	
+	}
+	I=elim(I,t1*t2);
+	setring @r;
+return(imap(RT,I));
+}
+proc reverse(ideal @L){
+	return(@L[size(@L)..1]);
+}
+proc HF(ideal @I, int @t){
+	@I=lead(std(@I));
+return(size(NF(maxideal(@t),@I)));
+}
+proc condCnt(poly F, list Ld, list Pts, int k){
+	ideal ptsId=1;
+	int multCnt;
+	bigint ptsCondCount;
+	"--------------------------------------";
+	" Point coordinates:  |  multiplicity:  ";
+	"--------------------------------------";
+	for(int i=1;i<=size(Pts);i++){
+		ptsId=intersect(ptsId,pideal(Pts[i]));
+		multCnt=1;
+		while(1){
+			if(NF(F,std(pideal(Pts[i])^multCnt))!=0){
+				"  ("+print(Pts[i],"2s%")+")  |  "+string(multCnt-1);
+				ptsCondCount=ptsCondCount+binomial(multCnt-1+nvars(basering)-2,nvars(basering)-1);
+				break;
+			};
+			multCnt++;
+		}
+	}
+	"--------------------------------------";
+	"total number of points: "+string(size(Pts));
+	"--------------------------------------";
+	ideal fatLine=Ld[1..size(Ld)];
+	"generators of the general line:";
+	std(fatLine);
+	multCnt=deg(F)-k;
+	while(1){
+		if(NF(F,std(fatLine^(multCnt)))!=0){
+			"";"mult(Ld)= "+string(multCnt-1);
+			break;
+		};
+		multCnt++;
+	}
+	"----------------------------------------------------------------------------------";
+	ptsId=std(ptsId);
+	int dependence=size(Pts)-HF(ptsId,deg(F));
+	if(dependence==0){
+		 "conditions imposed by vanishing in Z on the forms of degree d are independent";
+		}
+	else{
+		"conditions imposed by vanishing in Z on the forms of degree d are NOT independent";
+		"there are "+string(dependence)+" unrelevant condition(s)";
+		}	
+	ptsId=std(intersect(ptsId,fatLine^((deg(F)-k))));
+	bigint allFormCnt=binomial(nvars(basering)+deg(F)-1,nvars(basering)-1);
+	"----------------------------------------------------------------------------------";
+	"  adim(A_Z)= "+string(binomial(nvars(basering)+deg(F)-1,nvars(basering)-1)-HF(ptsId,deg(F)));
+	if(nvars(basering) >3){
+		bigint cond;
+		for(i=0;i<deg(F)-k;i++){
+			cond=cond+(i+1)*binomial(deg(F)-i+nvars(basering)-3,nvars(basering)-3);
+		}
+	}
+	else{
+		bigint cond=binomial(deg(F),2);
+	}
+	if(dependence==0){
+		"  vdim(A_Z)= "+string(allFormCnt-ptsCondCount-cond);
+		"--------------------------------------";
+	}
+	else{
+		"  vdim(A_Z) + #dependence conditions in Z= "+string(allFormCnt-ptsCondCount-cond+dependence);
+		"--------------------------------------";
+	}
+}
+
+ring R=(32003,e),(x,y,z,w),dp;
+minpoly=e2+e+1;
+
+//Fermat in P3
+list Pts=
+list(1,0,0,0),
+list(0,1,0,0),
+list(0,0,1,0),
+list(0,0,0,1),
+list(1,1,1,1),
+list(1,1,1,e),
+list(1,1,1,e2),
+list(1,1,e,1),
+list(1,1,e,e),
+list(1,1,e,e2),
+list(1,1,e2,1),
+list(1,1,e2,e),
+list(1,1,e2,e2),
+list(1,e,1,1),
+list(1,e,1,e),
+list(1,e,1,e2),
+list(1,e,e,1),
+list(1,e,e,e),
+list(1,e,e,e2),
+list(1,e,e2,1),
+list(1,e,e2,e),
+list(1,e,e2,e2),
+list(1,e2,1,1),
+list(1,e2,1,e),
+list(1,e2,1,e2),
+list(1,e2,e,1),
+list(1,e2,e,e),
+list(1,e2,e,e2),
+list(1,e2,e2,1),
+list(1,e2,e2,e),
+list(1,e2,e2,e2);
+
+proc unexpectedHypGen(list Pts, int k, int n){
+	int i,j,mark,tryN;
+	//dual hyperplanes to the points from Pts
+	list Pd;
+	for(i=1;i<=size(Pts);i++){
+		Pd[i]=ptToPlane(Pts[i]);
+	}
+	//L of codim=2, not passing through any point in Pts
+	list A,B;
+	list Ld;
+	ideal L;
+	int maxTry=5000;
+	while(mark==0 && tryN<maxTry){
+		tryN++;
+		mark=1;
+		for(i=1;i<=nvars(basering);i++){
+			A[i]=random(-2,3+(tryN div 10));
+			B[i]=random(-3-(tryN div 10),2);
+		}
+		Ld=scalarProd(A,maxideal(1)),scalarProd(B,maxideal(1));
+		L=dualL(A,B);
+		for(i=1;i<=size(Pts)-1;i++){
+			for(j=i+1;j<=size(Pts);j++){
+				if(dim(std(ideal(Pd[i])+ideal(Pd[j])+L))>0){mark=0; break;}
+			}	
+		}
+	}
+	if(tryN==maxTry){
+		return("After 5000 attempts no general line was created! Run program again."); 
+	}
+	//points base for codim=2 hyperplane, dual to L
+	ideal coord;
+	matrix Mij[nvars(basering)][nvars(basering)];
+	for(i=1;i<=nvars(basering)-1;i++){
+		Mij[1,i]=0;
+		ideal baseH;
+		coord=Ld[1],Ld[2];
+		for(j=1;j<=nvars(basering)-2;j++){
+			baseH[j]=random(-500,500);
+			coord=substitute(coord,var(j),baseH[j]);
+		}
+		coord=std(coord);
+		baseH[j]=-coeffs(coord[2],var(j))[1][1];
+		baseH[j+1]=-coeffs(coord[1],var(j+1))[1][1];
+		Mij[i+1,1..nvars(basering)]=baseH;
+		kill baseH;
+	}
+	Mij[1,i]=0;
+	kill coord;
+	list Mi;
+	matrix coord[nvars(basering)][nvars(basering)];
+	for(i=1;i<=nvars(basering);i++){
+		coord=Mij;
+		coord[1,i]=1;
+		coord[2,1..nvars(basering)]=maxideal(1);
+		Mi[i]=det(coord);
+	}
+	kill coord;
+	kill Mij;
+	// f=Q(A) = product of linear forms dual to each point in Pts
+	poly f=1; 
+	for(i=1;i<=size(Pts);i++){
+		f=f*Pd[i];
+	}
+	def @r=basering;
+	bigint totalSum=deg(f)-binomial(k+nvars(basering)-2,nvars(basering)-1);
+	ideal Im=jacob(f);
+	"generating symmetric power ...";
+	module Symm=Im^k;
+	qring Qf=std(f);
+	module Symm=imap(R,Symm);
+	ideal L=imap(R,L);
+	Symm=Symm+L;
+	"reduction ...";
+	Symm=reduce(Symm,std(0));
+	"finding module of minimal syzygies ...";
+	module minimalSyz=syz(Symm);
+	int range=size(maxideal(k)); 
+	minimalSyz=mstd(minimalSyz)[2];
+	module SyzContainer;
+	list exps;
+	//taking only relevant syzygies
+	for(i=size(minimalSyz);i>=1;i=i-1){
+		for(j=1;j<=range;j++){
+			if(deg(minimalSyz[i][j])>0){
+				exps=insert(exps,deg(minimalSyz[i][j]));
+				SyzContainer[size(minimalSyz)+1-i]=minimalSyz[i];
+				totalSum=totalSum-exps[1];
+				break;
+			}
+		}
+		if(totalSum<=0){
+			break;
+		}
+	}
+	if(size(exps)<binomial(k+nvars(basering)-1,nvars(basering)-1)-1){
+		for(i=size(exps)+1;i<=binomial(k+nvars(basering)-1,nvars(basering)-1)-1;i++){
+			exps=insert(exps,0);
+		}
+	}
+	"";"degrees of exponents:";
+	print(exps,"%s");
+	kill minimalSyz;
+	//reverse order in SyzContainer
+	if (size(SyzContainer)>0){
+        SyzContainer = SyzContainer[size(SyzContainer)..1];
+    }
+	setring @r;
+	module minimalSyz=imap(Qf,SyzContainer);
+	kill Qf;
+	//create g_i for syzygy number n
+	for(i=1;i<=nrows(minimalSyz[n]);i++){
+		poly g(i)=minimalSyz[n][i];
+	}
+	if(nrows(minimalSyz[n])<binomial(k+nvars(basering)-1,nvars(basering)-1)){
+		for(i=nrows(minimalSyz[n])+1;i<=binomial(k+nvars(basering)-1,nvars(basering)-1);i++){
+			poly g(i);
+		}	
+	}
+	// finding equation of hypersurface
+	poly F=0;
+	if(k==1){
+		ideal varOrder=maxideal(k);
+	}
+	else{
+		ideal varOrder=reverse(maxideal(k));
+	}
+	for(i=1;i<=binomial(k+nvars(basering)-1,nvars(basering)-1);i++){
+		F=F+substitute(g(i),maxideal(1),ideal(Mi[1..size(Mi)]))*varOrder[i];
+	}
+	condCnt(F, Ld, Pts, k);
+	"";"equation of the unexpected hypersurface:";
+	F;"";
+	"--------------------------------------";
+	return("end of computations");
+}
+"******************************************************************";
+"*          procedure unexpectedHypGen(Pts,k,n);                  *";
+"******************************************************************";
+"*  Pts - list of points                                          *";
+"*  k follows from D^k(A)                                         *";
+"*  n- syzygy number                                              *";
+"******************************************************************";
+//unexpectedHypGen(Pts,3,1); <- run it for computaitons of Example 6.3
