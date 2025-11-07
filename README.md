@@ -1,0 +1,24 @@
+# SyzMapPn – Singular script for constructing unexpected hypersurfaces
+
+This repository provides a **Singular** program implementing the syzygy-based construction of *unexpected hypersurfaces* in projective spaces $\mathbb{P}^n$, as described in article: Janasz–Malara–Tutaj-Gasińska, *Unexpected hypersurfaces of type $(d+k,d)$, 2025.
+
+The main procedure,  
+```unexpectedHypGen(Pts, k, n)```,  
+automatically generates and analyzes hypersurfaces of degree `d+k` having multiplicity `d` along a general codimension–2 subspace $\mathcal{H} \subset \mathbb{P}^n$, and passing through a prescribed finite set of points `Pts`.
+
+Features:
+  - Computes the dual hyperplane arrangement $\mathcal{A}_Z$ for a given set of points `Pts`.
+  - Constructs the module of $k$-th syzygies of the Jacobian ideal $J^k(f)$.
+  - Produces the defining equation of the hypersurface corresponding to the chosen syzygy.
+  - Detects multiplicities of base points and verifies unexpectedness via comparison of virtual and actual dimensions (`vdim`, `adim`).
+  - Includes built-in examples, e.g. the **Fermat (Ceva) configuration** in $\mathbb{P}^3$.
+
+Usage:
+  Load the file in **Singular** and run:
+  
+  unexpectedHypGen(Pts, k, n);
+
+  where:
+  Pts is the list of projective points (see examples inside the file),
+  k - corresponds to the order of derivations $D^k(\mathcal{A}_Z)$,
+  n - indicates the index of the selected syzygy.
