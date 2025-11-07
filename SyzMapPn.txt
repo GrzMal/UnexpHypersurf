@@ -105,44 +105,6 @@ proc condCnt(poly F, list Ld, list Pts, int k){
 		"--------------------------------------";
 	}
 }
-
-ring R=(32003,e),(x,y,z,w),dp;
-minpoly=e2+e+1;
-
-//Fermat in P3
-list Pts=
-list(1,0,0,0),
-list(0,1,0,0),
-list(0,0,1,0),
-list(0,0,0,1),
-list(1,1,1,1),
-list(1,1,1,e),
-list(1,1,1,e2),
-list(1,1,e,1),
-list(1,1,e,e),
-list(1,1,e,e2),
-list(1,1,e2,1),
-list(1,1,e2,e),
-list(1,1,e2,e2),
-list(1,e,1,1),
-list(1,e,1,e),
-list(1,e,1,e2),
-list(1,e,e,1),
-list(1,e,e,e),
-list(1,e,e,e2),
-list(1,e,e2,1),
-list(1,e,e2,e),
-list(1,e,e2,e2),
-list(1,e2,1,1),
-list(1,e2,1,e),
-list(1,e2,1,e2),
-list(1,e2,e,1),
-list(1,e2,e,e),
-list(1,e2,e,e2),
-list(1,e2,e2,1),
-list(1,e2,e2,e),
-list(1,e2,e2,e2);
-
 proc unexpectedHypGen(list Pts, int k, int n){
 	int i,j,mark,tryN;
 	//dual hyperplanes to the points from Pts
@@ -279,6 +241,45 @@ proc unexpectedHypGen(list Pts, int k, int n){
 	"--------------------------------------";
 	return("end of computations");
 }
+
+ring R=(32003,e),(x,y,z,w),dp;
+minpoly=e2+e+1;
+
+//Fermat configuration in P3
+list Pts=
+list(1,0,0,0),
+list(0,1,0,0),
+list(0,0,1,0),
+list(0,0,0,1),
+list(1,1,1,1),
+list(1,1,1,e),
+list(1,1,1,e2),
+list(1,1,e,1),
+list(1,1,e,e),
+list(1,1,e,e2),
+list(1,1,e2,1),
+list(1,1,e2,e),
+list(1,1,e2,e2),
+list(1,e,1,1),
+list(1,e,1,e),
+list(1,e,1,e2),
+list(1,e,e,1),
+list(1,e,e,e),
+list(1,e,e,e2),
+list(1,e,e2,1),
+list(1,e,e2,e),
+list(1,e,e2,e2),
+list(1,e2,1,1),
+list(1,e2,1,e),
+list(1,e2,1,e2),
+list(1,e2,e,1),
+list(1,e2,e,e),
+list(1,e2,e,e2),
+list(1,e2,e2,1),
+list(1,e2,e2,e),
+list(1,e2,e2,e2);
+
+
 "******************************************************************";
 "*          procedure unexpectedHypGen(Pts,k,n);                  *";
 "******************************************************************";
@@ -286,4 +287,5 @@ proc unexpectedHypGen(list Pts, int k, int n){
 "*  k follows from D^k(A)                                         *";
 "*  n- syzygy number                                              *";
 "******************************************************************";
+
 //unexpectedHypGen(Pts,3,1); <- run it for computaitons of Example 6.3
