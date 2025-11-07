@@ -6,14 +6,14 @@ The main procedure,
 ```unexpectedHypGen(Pts, k, n)```,  
 automatically generates and analyzes hypersurfaces of degree `d+k` having multiplicity `d` along a general codimension–2 subspace $\mathcal{H} \subset \mathbb{P}^n$, and passing through a prescribed finite set of points `Pts`.
 
-# Features:
+## Features:
   - Computes the dual hyperplane arrangement $\mathcal{A}_Z$ for a given set of points `Pts`.
   - Constructs the module of $k$-th syzygies of the Jacobian ideal $J^k(f)$.
   - Produces the defining equation of the hypersurface corresponding to the chosen syzygy.
   - Detects multiplicities of base points and verifies unexpectedness via comparison of virtual and actual dimensions (`vdim`, `adim`).
   - Includes built-in examples, e.g. the **Fermat (Ceva) configuration** in $\mathbb{P}^3$.
 
-# Usage:
+## Usage:
   Load the file in **Singular** and run:
   
   ```unexpectedHypGen(Pts, k, n)```
