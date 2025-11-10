@@ -133,7 +133,7 @@ proc unexpectedHypGen(list Pts, int k, int n){
 		}
 	}
 	if(tryN==maxTry){
-		return("After 5000 attempts no general line was created! Run program again."); 
+		return("After 5000 attempts no general line was created! Run program again and check if your ring has correct number of variables."); 
 	}
 	//points base for codim=2 hyperplane, dual to L
 	ideal coord;
@@ -289,3 +289,4 @@ list(1,e2,e2,e2);
 "******************************************************************";
 
 //unexpectedHypGen(Pts,3,1); <- run it for computaitons of Example 6.3
+
